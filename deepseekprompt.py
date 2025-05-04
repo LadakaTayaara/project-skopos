@@ -1,113 +1,96 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from pyacmi import Acmi
 from sklearn.ensemble import RandomForestRegressor
 import os
 import time
+import xml.etree.ElementTree as ET
+from collections import defaultdict
 
-def load_and_filter_acmi(file_path):
-    print("Loading ACMI file...")
+def parse_acmi_xml(xml_file):
+    print(f"Parsing ACMI XML file: {xml_file}")
     start_time = time.time()
     
     try:
-        acmi = Acmi()
-        acmi.load_acmi(filepath=file_path)
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
     except Exception as e:
-        print(f"Error loading ACMI file: {e}")
+        print(f"Error parsing XML file: {e}")
         return None
     
+    # Namespace handling (if present)
+    ns = {'acmi': ''}  # Default empty namespace
+    if '}' in root.tag:
+        ns['acmi'] = root.tag.split('}')[0].strip('{')
+    
     aerial_objects = {}
-    total_objects = len(acmi.objects)
-    print(f"Processing {total_objects} objects...")
-    
+    total_objects = 0
     position_count = 0
-    obj_with_positions = 0
     
-    for obj_id, obj in acmi.objects.items():
-        # Debug: Print object type and available attributes
-        obj_type = getattr(obj, 'type', 'Unknown')
-        print(f"\nObject {obj_id} (Type: {obj_type})")
-        print("Available attributes:", [attr for attr in dir(obj) if not attr.startswith('_')])
+    # Find all objects in the XML
+    for obj in root.findall('.//acmi:Object', namespaces=ns) + root.findall('.//Object'):
+        total_objects += 1
+        obj_id = obj.get('ID', str(total_objects))
+        obj_name = obj.get('Name', f'Object_{obj_id}')
+        obj_type = obj.get('Type', 'Unknown')
         
-        # Check for position data in different possible attributes
-        position_data = None
-        if hasattr(obj, 'position'):
-            position_data = obj.position
-            print(f"Found standard position attribute with {len(position_data)} points")
-        elif hasattr(obj, 'positions'):
-            position_data = obj.positions
-            print(f"Found alternative positions attribute with {len(position_data)} points")
-        elif hasattr(obj, 'location'):
-            position_data = obj.location
-            print(f"Found location attribute with position data")
-        
-        if position_data is None:
-            print(f"No position data found for object {obj_id}")
-            continue
-            
+        # Find all position records
         positions = []
-        try:
-            for pos in position_data:
-                # Handle different position formats
-                if hasattr(pos, 'x') and hasattr(pos, 'y') and hasattr(pos, 'z'):
-                    positions.append([pos.x, pos.y, pos.z])
-                elif isinstance(pos, (list, tuple)) and len(pos) >= 3:
-                    positions.append([pos[0], pos[1], pos[2]])
-                elif hasattr(pos, 'lat') and hasattr(pos, 'lon') and hasattr(pos, 'alt'):
-                    # Convert lat/lon/alt to XYZ if needed (simple approximation)
-                    positions.append([pos.lon, pos.lat, pos.alt])
+        for record in obj.findall('.//acmi:Record', namespaces=ns) + obj.findall('.//Record'):
+            # Try different position formats
+            pos = None
+            if record.get('X') and record.get('Y') and record.get('Z'):
+                pos = [float(record.get('X')), float(record.get('Y')), float(record.get('Z'))]
+            elif record.get('Lon') and record.get('Lat') and record.get('Alt'):
+                # Simple conversion from Lat/Lon to X/Y (for demo purposes)
+                lon = float(record.get('Lon'))
+                lat = float(record.get('Lat'))
+                alt = float(record.get('Alt'))
+                pos = [lon * 100000, lat * 100000, alt]  # Crude approximation
+            elif record.text and ',' in record.text:
+                try:
+                    pos = list(map(float, record.text.split(','))[:3])
+                except Exception as e:
+                    print(f"Error parsing position from record text: {record.text}, error: {e}")
+                except:
+                    pass
             
-            if len(positions) > 0:
-                position_count += len(positions)
-                obj_with_positions += 1
-                print(f"Extracted {len(positions)} valid position points")
-            else:
-                print("No valid position points extracted")
-                continue
-        except Exception as e:
-            print(f"Error processing positions for object {obj_id}: {e}")
-            continue
+            if pos and len(pos) == 3:
+                positions.append(pos)
         
-        # Store object if it has enough positions
         if len(positions) >= 10:
-            obj_name = getattr(obj, 'name', f'Object_{obj_id}')
+            position_count += len(positions)
             aerial_objects[obj_id] = {
                 'name': f"{obj_name} ({obj_type})",
                 'positions': np.array(positions, dtype=np.float32)
             }
     
-    print(f"\nACMI loading completed in {time.time() - start_time:.2f} seconds")
-    print(f"Objects with position data: {obj_with_positions}/{total_objects}")
-    print(f"Valid aerial objects: {len(aerial_objects)}")
+    print(f"Parsing completed in {time.time() - start_time:.2f} seconds")
+    print(f"Total objects found: {total_objects}")
+    print(f"Valid aerial objects with position data: {len(aerial_objects)}")
     print(f"Total position points: {position_count}")
     
     if not aerial_objects:
-        print("\nPossible reasons why no objects were found:")
-        print("1. The ACMI file might use non-standard position attributes")
-        print("2. Position data might be in a different format (e.g., lat/lon/alt instead of x/y/z)")
-        print("3. The objects might not have enough position points (minimum 10 required)")
-        
-        if total_objects > 0:
-            sample_obj_id, sample_obj = next(iter(acmi.objects.items()))
-            print("\nSample object details:")
-            print(f"ID: {sample_obj_id}")
-            print(f"Type: {getattr(sample_obj, 'type', 'Unknown')}")
-            print("All attributes:", [attr for attr in dir(sample_obj) if not attr.startswith('_')])
-            
-            if hasattr(sample_obj, 'position'):
-                print("\nPosition attribute exists but couldn't be parsed. First position:")
-                print(sample_obj.position[0] if len(sample_obj.position) > 0 else "Empty")
+        print("\nPossible reasons for no objects found:")
+        print("1. Position data might be in different XML elements/attributes")
+        print("2. The XML structure might differ from standard ACMI format")
+        print("\nDebug info - first object example:")
+        sample_obj = root.find('.//acmi:Object', namespaces=ns) or root.find('.//Object')
+        if sample_obj is not None:
+            print("Object attributes:", sample_obj.attrib)
+            sample_record = sample_obj.find('.//acmi:Record', namespaces=ns) or sample_obj.find('.//Record')
+            if sample_record is not None:
+                print("Record attributes:", sample_record.attrib)
+                print("Record text:", sample_record.text)
     
     return aerial_objects
 
-
 def train_trajectory_model(positions, future_steps=15):
     if len(positions) < future_steps + 1:
-        raise ValueError(f"Not enough positions ({len(positions)}) for training with future_steps={future_steps}")
+        raise ValueError(f"Not enough positions ({len(positions)}) for training")
     
-    start_time = time.time()
     print(f"Training model with {len(positions)} positions...")
+    start_time = time.time()
     
     n_samples = len(positions) - future_steps - 1
     X = np.zeros((n_samples, 4))
@@ -118,9 +101,8 @@ def train_trajectory_model(positions, future_steps=15):
         X[i] = np.append(positions[i], time_feature)
         y[i] = positions[i+1:i+1+future_steps].flatten()
     
-    n_estimators = min(100, 50 + len(positions) // 10)
     model = RandomForestRegressor(
-        n_estimators=n_estimators,
+        n_estimators=min(100, 50 + len(positions) // 10),
         random_state=42,
         n_jobs=-1,
         max_depth=10,
@@ -149,66 +131,58 @@ def plot_results(history, predicted, obj_name):
     ax = fig.add_subplot(111, projection='3d')
     
     ax.plot(history[:, 0], history[:, 1], history[:, 2], 
-            'b-', linewidth=3, label='Actual Path', alpha=0.8)
-    
+            'b-', linewidth=2, label='Actual Path')
     ax.plot(predicted[:, 0], predicted[:, 1], predicted[:, 2], 
-            'r--', linewidth=3, label='Predicted Path', alpha=0.8)
+            'r--', linewidth=2, label='Predicted Path')
     
-    ax.plot([history[-1, 0], predicted[0, 0]], 
-            [history[-1, 1], predicted[0, 1]], 
-            [history[-1, 2], predicted[0, 2]], 
-            'g-', linewidth=2, label='Prediction Start')
-    
-    ax.set_xlabel('X Coordinate', fontsize=12)
-    ax.set_ylabel('Y Coordinate', fontsize=12)
-    ax.set_zlabel('Altitude (Z)', fontsize=12)
-    ax.set_title(f'Trajectory Prediction for {obj_name}', fontsize=14, pad=20)
-    ax.legend(fontsize=12, loc='upper right')
-    ax.grid(True, alpha=0.2)
+    ax.set_xlabel('X Coordinate')
+    ax.set_ylabel('Y Coordinate')
+    ax.set_zlabel('Altitude (Z)')
+    ax.set_title(f'Trajectory Prediction for {obj_name}')
+    ax.legend()
+    ax.grid(True)
     
     plt.tight_layout()
     plt.show()
 
 def main():
-    acmi_file = r"C:\Users\Abhinandan Singh\Desktop\SCOPOS\demofile.acmi"
+    # Change this to your XML file path
+    xml_file = r"C:\Users\Abhinandan Singh\Desktop\SCOPOS\demofile.xml"
     
-    if not os.path.exists(acmi_file):
-        print(f"Error: File not found at {acmi_file}")
-        print("Please verify the path and try again.")
+    if not os.path.exists(xml_file):
+        print(f"Error: File not found at {xml_file}")
         return
     
-    print(f"Processing ACMI file: {os.path.basename(acmi_file)}")
-    aerial_objects = load_and_filter_acmi(acmi_file)
+    aerial_objects = parse_acmi_xml(xml_file)
     
     if not aerial_objects:
+        print("No valid objects found with position data.")
         return
     
-    print("\nAerial objects available for prediction:")
+    print("\nAvailable objects:")
     for i, (obj_id, obj) in enumerate(aerial_objects.items()):
         print(f"{i+1}. {obj['name']} (Points: {len(obj['positions'])})")
     
     while True:
+        choice = input("\nSelect an object (number) or 'q' to quit: ")
+        if choice.lower() == 'q':
+            return
+        
         try:
-            choice = input("\nSelect an aircraft to predict (number) or 'q' to quit: ")
-            if choice.lower() == 'q':
-                return
             choice = int(choice) - 1
             if 0 <= choice < len(aerial_objects):
-                break
-            print(f"Please enter a number between 1 and {len(aerial_objects)}")
+                obj_id = list(aerial_objects.keys())[choice]
+                obj = aerial_objects[obj_id]
+                print(f"\nProcessing: {obj['name']}")
+                
+                try:
+                    model, steps = train_trajectory_model(obj['positions'])
+                    predicted = predict_trajectory(model, obj['positions'], steps)
+                    plot_results(obj['positions'], predicted, obj['name'])
+                except Exception as e:
+                    print(f"Prediction error: {e}")
         except ValueError:
-            print("Invalid input. Please enter a number.")
-    
-    obj_id = list(aerial_objects.keys())[choice]
-    obj = aerial_objects[obj_id]
-    print(f"\nAnalyzing: {obj['name']}")
-    
-    try:
-        model, future_steps = train_trajectory_model(obj['positions'])
-        predicted = predict_trajectory(model, obj['positions'], future_steps)
-        plot_results(obj['positions'], predicted, obj['name'])
-    except Exception as e:
-        print(f"Error during trajectory prediction: {e}")
+            print("Please enter a valid number or 'q' to quit")
 
 if __name__ == "__main__":
     main()
