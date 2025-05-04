@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from pyacmi import Acmi
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
 import os
 import time
 
@@ -23,54 +22,85 @@ def load_and_filter_acmi(file_path):
     print(f"Processing {total_objects} objects...")
     
     position_count = 0
-    for i, obj in enumerate(acmi.objects):
-        if i % 100 == 0 or i == total_objects - 1:
-            print(f"Processed {i+1}/{total_objects} objects...")
+    obj_with_positions = 0
+    
+    for obj_id, obj in acmi.objects.items():
+        # Debug: Print object type and available attributes
+        obj_type = getattr(obj, 'type', 'Unknown')
+        print(f"\nObject {obj_id} (Type: {obj_type})")
+        print("Available attributes:", [attr for attr in dir(obj) if not attr.startswith('_')])
         
-        # Skip objects without position data
-        if not hasattr(obj, 'position'):
+        # Check for position data in different possible attributes
+        position_data = None
+        if hasattr(obj, 'position'):
+            position_data = obj.position
+            print(f"Found standard position attribute with {len(position_data)} points")
+        elif hasattr(obj, 'positions'):
+            position_data = obj.positions
+            print(f"Found alternative positions attribute with {len(position_data)} points")
+        elif hasattr(obj, 'location'):
+            position_data = obj.location
+            print(f"Found location attribute with position data")
+        
+        if position_data is None:
+            print(f"No position data found for object {obj_id}")
             continue
             
         positions = []
         try:
-            for pos in obj.position:
+            for pos in position_data:
+                # Handle different position formats
                 if hasattr(pos, 'x') and hasattr(pos, 'y') and hasattr(pos, 'z'):
                     positions.append([pos.x, pos.y, pos.z])
-            position_count += len(positions)
+                elif isinstance(pos, (list, tuple)) and len(pos) >= 3:
+                    positions.append([pos[0], pos[1], pos[2]])
+                elif hasattr(pos, 'lat') and hasattr(pos, 'lon') and hasattr(pos, 'alt'):
+                    # Convert lat/lon/alt to XYZ if needed (simple approximation)
+                    positions.append([pos.lon, pos.lat, pos.alt])
+            
+            if len(positions) > 0:
+                position_count += len(positions)
+                obj_with_positions += 1
+                print(f"Extracted {len(positions)} valid position points")
+            else:
+                print("No valid position points extracted")
+                continue
         except Exception as e:
-            print(f"Error processing positions for object {obj.id}: {e}")
+            print(f"Error processing positions for object {obj_id}: {e}")
             continue
         
-        # Less strict filtering - require at least 10 positions
+        # Store object if it has enough positions
         if len(positions) >= 10:
-            obj_name = getattr(obj, 'name', f'Object_{obj.id}')
-            obj_type = getattr(obj, 'type', 'Unknown')
-            aerial_objects[obj.id] = {
+            obj_name = getattr(obj, 'name', f'Object_{obj_id}')
+            aerial_objects[obj_id] = {
                 'name': f"{obj_name} ({obj_type})",
                 'positions': np.array(positions, dtype=np.float32)
             }
     
-    print(f"ACMI loading completed in {time.time() - start_time:.2f} seconds")
-    print(f"Found {len(aerial_objects)} aerial objects with {position_count} total position points")
+    print(f"\nACMI loading completed in {time.time() - start_time:.2f} seconds")
+    print(f"Objects with position data: {obj_with_positions}/{total_objects}")
+    print(f"Valid aerial objects: {len(aerial_objects)}")
+    print(f"Total position points: {position_count}")
     
     if not aerial_objects:
-        print("\nDetailed analysis of why no objects were found:")
-        print(f"- Total objects processed: {total_objects}")
+        print("\nPossible reasons why no objects were found:")
+        print("1. The ACMI file might use non-standard position attributes")
+        print("2. Position data might be in a different format (e.g., lat/lon/alt instead of x/y/z)")
+        print("3. The objects might not have enough position points (minimum 10 required)")
+        
         if total_objects > 0:
-            sample_obj = acmi.objects[0]
-            print("\nSample object attributes:")
-            print(f"Object ID: {sample_obj.id}")
-            print(f"Has position attribute: {hasattr(sample_obj, 'position')}")
+            sample_obj_id, sample_obj = next(iter(acmi.objects.items()))
+            print("\nSample object details:")
+            print(f"ID: {sample_obj_id}")
+            print(f"Type: {getattr(sample_obj, 'type', 'Unknown')}")
+            print("All attributes:", [attr for attr in dir(sample_obj) if not attr.startswith('_')])
+            
             if hasattr(sample_obj, 'position'):
-                print(f"Number of positions: {len(sample_obj.position)}")
-                if len(sample_obj.position) > 0:
-                    sample_pos = sample_obj.position[0]
-                    print("First position attributes:")
-                    print(f"Has x: {hasattr(sample_pos, 'x')}")
-                    print(f"Has y: {hasattr(sample_pos, 'y')}")
-                    print(f"Has z: {hasattr(sample_pos, 'z')}")
+                print("\nPosition attribute exists but couldn't be parsed. First position:")
+                print(sample_obj.position[0] if len(sample_obj.position) > 0 else "Empty")
     
     return aerial_objects
+
 
 def train_trajectory_model(positions, future_steps=15):
     if len(positions) < future_steps + 1:
