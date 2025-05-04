@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<TacviewDebriefing Version="1.2.6">
+	<!--Flight Recording Properties-->
+	<FlightRecording>
+		<Source>DCS 2.9.14.8394</Source>
+		<Recorder>DCS2ACMI 1.9.4.200</Recorder>
+		<RecordingTime>2025-04-11T11:41:29.512Z</RecordingTime>
+		<Author>New callsign</Author>
+	</FlightRecording>
+	<!--Mission Properties-->
+	<Mission>
+		<Title>demofile</Title>
+		<Category>CAP</Category>
+		<MissionTime>2016-06-21T04:00:00Z</MissionTime>
+		<Duration>286.83</Duration>
+	</Mission>
+	<!--Flight Log-->
+	<Events>
+		<Event>
+			<Time>6.87</Time>
+			<Location>
+				<Longitude>41.4545767</Longitude>
+				<Latitude>43.2420475</Latitude>
+				<Altitude>9063.42</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="6">
+				<Type>Missile</Type>
+				<Name>AIM-120C AMRAAM</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</SecondaryObject>
+		</Event>
+		<Event>
+			<Time>16.52</Time>
+			<Location>
+				<Longitude>41.5231344</Longitude>
+				<Latitude>43.5877928</Latitude>
+				<Altitude>8984.62</Altitude>
+			</Location>
+			<PrimaryObject ID="5">
+				<Type>Aircraft</Type>
+				<Name>Shenyang J-11A</Name>
+				<Pilot>New callsign</Pilot>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Group>Aerial-1</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="7">
+				<Type>Missile</Type>
+				<Name>R-77 (AA-12 Adder)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</SecondaryObject>
+			<LockedObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</LockedObject>
+		</Event>
+		<Event>
+			<Time>78.52</Time>
+			<Location>
+				<Longitude>41.3650655</Longitude>
+				<Latitude>43.4026803</Latitude>
+				<Altitude>3270.38</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="75">
+				<Type>Missile</Type>
+				<Name>AIM-120C AMRAAM</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</SecondaryObject>
+		</Event>
+		<Event>
+			<Time>89.74</Time>
+			<Location>
+				<Longitude>41.5449133</Longitude>
+				<Latitude>43.5680968</Latitude>
+				<Altitude>2786.9</Altitude>
+			</Location>
+			<PrimaryObject ID="6">
+				<Type>Missile</Type>
+				<Name>AIM-120C AMRAAM</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>90.73</Time>
+			<Location>
+				<Longitude>41.3539679</Longitude>
+				<Latitude>43.384734</Latitude>
+				<Altitude>2663.55</Altitude>
+			</Location>
+			<PrimaryObject ID="7">
+				<Type>Missile</Type>
+				<Name>R-77 (AA-12 Adder)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>102.71</Time>
+			<Location>
+				<Longitude>41.4847087</Longitude>
+				<Latitude>43.5152212</Latitude>
+				<Altitude>2638.88</Altitude>
+			</Location>
+			<PrimaryObject ID="75">
+				<Type>Missile</Type>
+				<Name>AIM-120C AMRAAM</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>117.04</Time>
+			<Location>
+				<Longitude>41.4390861</Longitude>
+				<Latitude>43.4691429</Latitude>
+				<Altitude>3434.24</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="106">
+				<Type>Missile</Type>
+				<Name>AIM-9 Sidewinder</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</SecondaryObject>
+		</Event>
+		<Event>
+			<Time>121.90</Time>
+			<Location>
+				<Longitude>41.466048</Longitude>
+				<Latitude>43.4892161</Latitude>
+				<Altitude>3069.84</Altitude>
+			</Location>
+			<PrimaryObject ID="5">
+				<Type>Aircraft</Type>
+				<Name>Shenyang J-11A</Name>
+				<Pilot>New callsign</Pilot>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Group>Aerial-1</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="175">
+				<Type>Missile</Type>
+				<Name>R-73 (AA-11 Archer)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</SecondaryObject>
+			<LockedObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</LockedObject>
+		</Event>
+		<Event>
+			<Time>125.17</Time>
+			<Location>
+				<Longitude>41.4822879</Longitude>
+				<Latitude>43.5035387</Latitude>
+				<Altitude>2862.82</Altitude>
+			</Location>
+			<PrimaryObject ID="106">
+				<Type>Missile</Type>
+				<Name>AIM-9 Sidewinder</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>142.21</Time>
+			<Location>
+				<Longitude>41.4069352</Longitude>
+				<Latitude>43.5112296</Latitude>
+				<Altitude>2113.73</Altitude>
+			</Location>
+			<PrimaryObject ID="175">
+				<Type>Missile</Type>
+				<Name>R-73 (AA-11 Archer)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>192.28</Time>
+			<Location>
+				<Longitude>41.4736292</Longitude>
+				<Latitude>43.4943677</Latitude>
+				<Altitude>3159.15</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="198">
+				<Type>Missile</Type>
+				<Name>AIM-9 Sidewinder</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</SecondaryObject>
+		</Event>
+		<Event>
+			<Time>198.64</Time>
+			<Location>
+				<Longitude>41.4782013</Longitude>
+				<Latitude>43.4628133</Latitude>
+				<Altitude>1958.13</Altitude>
+			</Location>
+			<PrimaryObject ID="198">
+				<Type>Missile</Type>
+				<Name>AIM-9 Sidewinder</Name>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Parent>4</Parent>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+		</Event>
+		<Event>
+			<Time>229.30</Time>
+			<Location>
+				<Longitude>41.4916683</Longitude>
+				<Latitude>43.4898496</Latitude>
+				<Altitude>2342.82</Altitude>
+			</Location>
+			<PrimaryObject ID="5">
+				<Type>Aircraft</Type>
+				<Name>Shenyang J-11A</Name>
+				<Pilot>New callsign</Pilot>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Group>Aerial-1</Group>
+			</PrimaryObject>
+			<Action>HasFired</Action>
+			<SecondaryObject ID="233">
+				<Type>Missile</Type>
+				<Name>R-73 (AA-11 Archer)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</SecondaryObject>
+			<LockedObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</LockedObject>
+		</Event>
+		<Event>
+			<Time>237.33</Time>
+			<Location>
+				<Longitude>41.5013666</Longitude>
+				<Latitude>43.4657896</Latitude>
+				<Altitude>2615.93</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasBeenHitBy</Action>
+			<SecondaryObject ID="233">
+				<Type>Missile</Type>
+				<Name>R-73 (AA-11 Archer)</Name>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Parent>5</Parent>
+			</SecondaryObject>
+			<ParentObject ID="5">
+				<Type>Aircraft</Type>
+				<Name>Shenyang J-11A</Name>
+				<Pilot>New callsign</Pilot>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Group>Aerial-1</Group>
+			</ParentObject>
+		</Event>
+		<Event>
+			<Time>237.33</Time>
+			<Location>
+				<Longitude>41.5013666</Longitude>
+				<Latitude>43.4657896</Latitude>
+				<Altitude>2615.93</Altitude>
+			</Location>
+			<PrimaryObject ID="4">
+				<Type>Aircraft</Type>
+				<Name>F-16C Fighting Falcon</Name>
+				<Pilot>Aerial-2-1</Pilot>
+				<Coalition>Enemies</Coalition>
+				<Country>us</Country>
+				<Group>Aerial-2</Group>
+			</PrimaryObject>
+			<Action>HasBeenDestroyed</Action>
+			<SecondaryObject ID="5">
+				<Type>Aircraft</Type>
+				<Name>Shenyang J-11A</Name>
+				<Pilot>New callsign</Pilot>
+				<Coalition>Allies</Coalition>
+				<Country>xr</Country>
+				<Group>Aerial-1</Group>
+			</SecondaryObject>
+		</Event>
+	</Events>
+</TacviewDebriefing>
