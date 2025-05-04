@@ -22,11 +22,13 @@ def load_and_filter_acmi(file_path):
     total_objects = len(acmi.objects)
     print(f"Processing {total_objects} objects...")
     
+    position_count = 0
     for i, obj in enumerate(acmi.objects):
-        if i % 100 == 0:
-            print(f"Processed {i}/{total_objects} objects...")
+        if i % 100 == 0 or i == total_objects - 1:
+            print(f"Processed {i+1}/{total_objects} objects...")
         
-        if not hasattr(obj, 'position') or len(obj.position) < 10:
+        # Skip objects without position data
+        if not hasattr(obj, 'position'):
             continue
             
         positions = []
@@ -34,11 +36,13 @@ def load_and_filter_acmi(file_path):
             for pos in obj.position:
                 if hasattr(pos, 'x') and hasattr(pos, 'y') and hasattr(pos, 'z'):
                     positions.append([pos.x, pos.y, pos.z])
+            position_count += len(positions)
         except Exception as e:
             print(f"Error processing positions for object {obj.id}: {e}")
             continue
         
-        if len(positions) > 20:
+        # Less strict filtering - require at least 10 positions
+        if len(positions) >= 10:
             obj_name = getattr(obj, 'name', f'Object_{obj.id}')
             obj_type = getattr(obj, 'type', 'Unknown')
             aerial_objects[obj.id] = {
@@ -47,10 +51,31 @@ def load_and_filter_acmi(file_path):
             }
     
     print(f"ACMI loading completed in {time.time() - start_time:.2f} seconds")
-    print(f"Found {len(aerial_objects)} valid aerial objects")
+    print(f"Found {len(aerial_objects)} aerial objects with {position_count} total position points")
+    
+    if not aerial_objects:
+        print("\nDetailed analysis of why no objects were found:")
+        print(f"- Total objects processed: {total_objects}")
+        if total_objects > 0:
+            sample_obj = acmi.objects[0]
+            print("\nSample object attributes:")
+            print(f"Object ID: {sample_obj.id}")
+            print(f"Has position attribute: {hasattr(sample_obj, 'position')}")
+            if hasattr(sample_obj, 'position'):
+                print(f"Number of positions: {len(sample_obj.position)}")
+                if len(sample_obj.position) > 0:
+                    sample_pos = sample_obj.position[0]
+                    print("First position attributes:")
+                    print(f"Has x: {hasattr(sample_pos, 'x')}")
+                    print(f"Has y: {hasattr(sample_pos, 'y')}")
+                    print(f"Has z: {hasattr(sample_pos, 'z')}")
+    
     return aerial_objects
 
 def train_trajectory_model(positions, future_steps=15):
+    if len(positions) < future_steps + 1:
+        raise ValueError(f"Not enough positions ({len(positions)}) for training with future_steps={future_steps}")
+    
     start_time = time.time()
     print(f"Training model with {len(positions)} positions...")
     
@@ -126,11 +151,6 @@ def main():
     aerial_objects = load_and_filter_acmi(acmi_file)
     
     if not aerial_objects:
-        print("No valid aerial objects found in the ACMI file.")
-        print("Possible reasons:")
-        print("- The file format might not be supported")
-        print("- No objects with sufficient trajectory data")
-        print("- All objects might be below altitude threshold")
         return
     
     print("\nAerial objects available for prediction:")
@@ -153,10 +173,12 @@ def main():
     obj = aerial_objects[obj_id]
     print(f"\nAnalyzing: {obj['name']}")
     
-    model, future_steps = train_trajectory_model(obj['positions'])
-    predicted = predict_trajectory(model, obj['positions'], future_steps)
-    
-    plot_results(obj['positions'], predicted, obj['name'])
+    try:
+        model, future_steps = train_trajectory_model(obj['positions'])
+        predicted = predict_trajectory(model, obj['positions'], future_steps)
+        plot_results(obj['positions'], predicted, obj['name'])
+    except Exception as e:
+        print(f"Error during trajectory prediction: {e}")
 
 if __name__ == "__main__":
     main()
